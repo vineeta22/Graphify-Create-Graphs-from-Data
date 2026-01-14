@@ -106,7 +106,7 @@
 //     }
 // });
 
-// app.listen(5000, () => console.log("✅ Server running on http://localhost:5000"));
+// app.listen(5000, () => console.log("Server running on http://localhost:5000"));
 
 // index.js
 const express = require("express");
@@ -121,46 +121,44 @@ app.use(cors());
 app.use(fileUpload({ limits: { fileSize: 50 * 1024 * 1024 } })); // 50MB limit
 
 app.post("/upload", (req, res) => {
-    try {
-        if (!req.files || !req.files.csvFile) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
-
-        const csvFile = req.files.csvFile;
-
-        if (!csvFile.name.endsWith(".csv")) {
-            return res.status(400).json({ error: "Only CSV files allowed" });
-        }
-
-        const uploadDir = path.join(__dirname, "uploads");
-        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-        const filePath = path.join(uploadDir, csvFile.name);
-
-        csvFile.mv(filePath, (err) => {
-            if (err) return res.status(500).json({ error: "Failed to save file" });
-
-            const results = [];
-            fs.createReadStream(filePath)
-                .pipe(csv())
-                .on("data", (row) => results.push(row))
-                .on("end", () => {
-                    fs.unlink(filePath, () => {}); // delete temp file
-                    res.json({
-                        message: "CSV read successfully",
-                        data: results
-                    });
-                })
-                .on("error", () => {
-                    fs.unlink(filePath, () => {});
-                    res.status(500).json({ error: "Error reading CSV" });
-                });
-        });
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
+  try {
+    if (!req.files || !req.files.csvFile) {
+      return res.status(400).json({ error: "No file uploaded" });
     }
+
+    const csvFile = req.files.csvFile;
+
+    if (!csvFile.name.endsWith(".csv")) {
+      return res.status(400).json({ error: "Only CSV files allowed" });
+    }
+
+    const uploadDir = path.join(__dirname, "uploads");
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+    const filePath = path.join(uploadDir, csvFile.name);
+
+    csvFile.mv(filePath, (err) => {
+      if (err) return res.status(500).json({ error: "Failed to save file" });
+
+      const results = [];
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on("data", (row) => results.push(row))
+        .on("end", () => {
+          fs.unlink(filePath, () => {}); // delete temp file
+          res.json({
+            message: "CSV read successfully",
+            data: results,
+          });
+        })
+        .on("error", () => {
+          fs.unlink(filePath, () => {});
+          res.status(500).json({ error: "Error reading CSV" });
+        });
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-app.listen(5000, () =>
-    console.log("✅ Server running on http://localhost:5000")
-);
+app.listen(5000, () => console.log("Server running on http://localhost:5000"));

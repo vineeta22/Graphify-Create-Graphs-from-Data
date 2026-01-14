@@ -7,13 +7,12 @@ const PALETTE = ["#FF7F50","#1E90FF","#FFD700","#32CD32","#FF69B4","#8A2BE2","#2
 export default function PieChartComponent({ data = [] }) {
   if (!data || data.length === 0) return <div style={{ color: "#bbb" }}>No data</div>;
 
-  // optional: sort descending
   const chartData = [...data].sort((a,b) => b.value - a.value);
   const total = chartData.reduce((s,d) => s + d.value, 0);
   const enriched = chartData.map(d => ({ ...d, percent: total === 0 ? 0 : d.value / total }));
 
   return (
-    // Give the responsive container an explicit numeric height
+   
     <div style={{ width: "100%", height: 400 }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>

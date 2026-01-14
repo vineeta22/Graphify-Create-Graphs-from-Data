@@ -1,194 +1,5 @@
 // import { useForm } from "react-hook-form";
 // import { useState } from "react";
-// import CSVColumns from "./CSVColumns";
-
-// import ExpensesChart from "./ExpensesChart";
-// //import LineChart from "./LineChart";
-// //import BarChart from "./BarChart";
-// import "./App1.css";
-
-// function App1() {
-//   const {
-//     register,
-//     handleSubmit,
-//     formState: { errors, isSubmitting },
-//     reset,
-//   } = useForm();
-
-
-//   const [serverError, setServerError] = useState("");
-//   const [csvColumns, setCsvColumns] = useState([]);
-
-//   const [csvData, setCsvData] = useState([]); // Store full CSV rows
-//   const [selectedColumn, setSelectedColumn] = useState(null);
-//   const [selectedChartType, setSelectedChartType] = useState(null);
-//   const [chartError, setChartError] = useState(""); // ✅ for chart-specific errors
-
-//   const onSubmit = async (data) => {
-
-//     setServerError("");
-//     setCsvColumns([]);
-
-//     setSelectedColumn(null);
-//     setCsvData([]);
-//     setChartError(""); // clear previous errors
-//     setSelectedChartType(data.chartType); // store selected chart type
-
-//     const formData = new FormData();
-//     formData.append("companyName", data.companyName);
-//     formData.append("chartType", data.chartType);
-//     formData.append("csvFile", data.csvFile[0]); // File input returns an array
-
-//     try {
-//       const response = await fetch("/upload", {
-//         method: "POST",
-//         body: formData,
-//       });
-
-//       if (!response.ok) {
-//         const errorText = await response.text();
-//         throw new Error(errorText || "Server error");
-//       }
-
-//       const result = await response.json();
-//       //console.log("Server response:", result);
-//       if (result.data.length > 0) {
-//         setCsvColumns(Object.keys(result.data[0]));
-
-//         setCsvData(result.data); // Store full CSV data
-//       }
-//       reset();
-
-//     } catch (error) {
-//       console.error("Upload failed:", error);
-//       setServerError(error.message || "Upload failed");
-//     }
-//   };
-
-//   // When user clicks a column, set it as selected
-//   const handleColumnClick = (column) => {
-//     setSelectedColumn(column);
-//     setChartError(""); // clear any previous error
-
-
-//     if (csvData.length === 0) {
-//       setChartError("No CSV data loaded.");
-//       return;
-//     }
-
-//     // Validate if selected column has numeric data
-//     const hasNumericData = csvData.some(row => {
-//       const val = row[column];
-//       return val !== null && val !== undefined && !isNaN(Number(val));
-//     });
-
-
-//     if (!hasNumericData) {
-//       setChartError(`Column "${column}" does not contain valid numeric values.`);
-//     }
-//   };
-
-
-//   // Prepare chart data based on selected column and csvData
-//   // Transform csvData rows to { name: row[firstCol], value: row[selectedColumn] }
-//   // If no name column, fallback to row index as name
-//   const getChartData = () => {
-//     if (!selectedColumn || csvData.length === 0) return [];
-
-//     const nameKey = csvColumns.includes("name") ? "name" : csvColumns[0];
-
-//     return csvData.map((row, idx) => ({
-//       name: row[nameKey] || `Row ${idx + 1}`,
-//       value: Number(row[selectedColumn]) || 0,
-//     }));
-//   };
-
-//   // Render selected chart with prepared data
-//   const renderChart = () => {
-
-//     if (chartError) {
-//       return <p className="error" style={{ color: "red" }}>{chartError}</p>;
-//     }
-
-//     const dataForChart = getChartData();
-
-//     if (dataForChart.length === 0) return <p>No data for selected column.</p>;
-
-//     switch (selectedChartType) {
-//       case "pie":
-//         return <ExpensesChart data={dataForChart} />;
-//       case "bar":
-//         return <BarChart data={dataForChart} />;
-//       // return <p>BarChart component is not imported yet.</p>;
-//       case "line":
-//         // return <LineChart data={dataForChart} />;
-//         return <p>LineChart component is not imported yet.</p>;
-//       default:
-//         return null;
-//     }
-//   };
-
-
-
-//   return (
-//     <div className="login-container">
-//       <form onSubmit={handleSubmit(onSubmit)} className="login-box">
-//         {/* Company Name */}
-//         <label>Company Name</label>
-//         <input
-//           className={errors.companyName ? "input-error" : ""}
-//           {...register("companyName", { required: "Company name is required" })}
-//           placeholder="Enter your company name"
-//         />
-//         {errors.companyName && <p className="error">{errors.companyName.message}</p>}
-
-//         {/* Chart Type */}
-//         <label>Choose Chart Type</label>
-//         <div className="radio-group">
-//           <label>
-//             <input type="radio" value="bar" {...register("chartType", { required: "Select a chart type" })} /> Bar Chart
-//           </label>
-//           <label>
-//             <input type="radio" value="pie" {...register("chartType", { required: "Select a chart type" })} /> Pie Chart
-//           </label>
-//           <label>
-//             <input type="radio" value="line" {...register("chartType", { required: "Select a chart type" })} /> Line Chart
-//           </label>
-//         </div>
-//         {errors.chartType && <p className="error">{errors.chartType.message}</p>}
-
-//         {/* CSV File Upload */}
-//         <label>Upload CSV File</label>
-//         <input
-//           type="file"
-//           accept=".csv"
-//           {...register("csvFile", { required: "CSV file is required" })}
-//         />
-//         {errors.csvFile && <p className="error">{errors.csvFile.message}</p>}
-
-//         {/* Submit Button */}
-//         <button type="submit" disabled={isSubmitting}>
-//           {isSubmitting ? "Submitting..." : "Submit"}
-//         </button>
-//       </form>
-
-//       {/* ✅ Display CSV Columns here with click handler */}
-//       <CSVColumns columns={csvColumns} selectedColumn={selectedColumn} onColumnClick={handleColumnClick} />
-
-//       {/* Show the chart when a column is selected */}
-//       <div style={{ marginTop: "30px" }}>{selectedColumn && renderChart()}</div>
-
-//       {/* Show server error */}
-//       {serverError && <p className="error">{serverError}</p>}
-
-//     </div >
-//   );
-// }
-
-// export default App1;
-
-// import { useForm } from "react-hook-form";
-// import { useState } from "react";
 // import ExpensesChart from "./ExpensesChart";
 // import "./App1.css";
 
@@ -516,151 +327,46 @@
 //   );
 // }
 
-// src/App.jsx
-// import React, { useState } from "react";
-// import Papa from "papaparse";
-// import PieChartComponent from "./Components/PieChartComponent";
 
-// export default function App1() {
-//   const [file, setFile] = useState(null);
-//   const [previewRows, setPreviewRows] = useState([]);
-//   const [columns, setColumns] = useState([]);
-//   const [categoryCol, setCategoryCol] = useState("");
-//   const [valueCol, setValueCol] = useState("");
-//   const [aggMode, setAggMode] = useState("count");
-//   const [chartData, setChartData] = useState([]);
-//   const [statusMsg, setStatusMsg] = useState("");
-
-//   const handleFile = (e) => {
-//     const f = e.target.files[0];
-//     if (!f) return;
-//     setFile(f);
-//     Papa.parse(f, {
-//       header: true,
-//       skipEmptyLines: true,
-//       worker: true,
-//       preview: 200,
-//       complete: (res) => {
-//         setPreviewRows(res.data.slice(0, 10));
-//         setColumns(Object.keys(res.data[0] || {}));
-//         setStatusMsg(`Preview loaded (${res.data.length} rows).`);
-//       },
-//     });
-//   };
-
-//   const uploadToServer = async () => {
-//     if (!file) return alert("Please upload a CSV file first");
-//     if (!categoryCol) return alert("Select category column");
-//     const fd = new FormData();
-//     fd.append("csvFile", file);
-
-//     try {
-//       setStatusMsg("Uploading...");
-//       const res = await fetch("http://localhost:5000/upload", { method: "POST", body: fd });
-//       const json = await res.json();
-//       if (!json || !json.data) {
-//         setStatusMsg("No data returned from server");
-//         return;
-//       }
-
-//       // aggregate
-//       const grouped = {};
-//       json.data.forEach((row) => {
-//         const key = (row[categoryCol] || "Unknown").toString();
-//         if (aggMode === "count") grouped[key] = (grouped[key] || 0) + 1;
-//         else grouped[key] = (grouped[key] || 0) + Number(row[valueCol] || 0);
-//       });
-//       const arr = Object.keys(grouped).map(k => ({ name: k, value: grouped[k] }));
-//       setChartData(arr);
-//       setStatusMsg("Chart ready");
-//     } catch (err) {
-//       console.error(err);
-//       setStatusMsg("Upload failed: " + err.message);
-//     }
-//   };
-
-//   return (
-//     <div style={{ maxWidth: 1100, margin: "12px auto", color: "#111", fontFamily: "Arial, sans-serif" }}>
-//       <h2>CSV → Chart Generator</h2>
-//       <input type="file" accept=".csv" onChange={handleFile} />
-//       {columns.length > 0 && (
-//         <div style={{ marginTop: 12 }}>
-//           <label>Category Column:</label>
-//           <select value={categoryCol} onChange={(e) => setCategoryCol(e.target.value)}>
-//             <option value="">--select--</option>
-//             {columns.map(c => <option key={c} value={c}>{c}</option>)}
-//           </select>
-
-//           <label style={{ marginLeft: 12 }}>Aggregation:</label>
-//           <select value={aggMode} onChange={(e) => setAggMode(e.target.value)}>
-//             <option value="count">Count</option>
-//             <option value="sum">Sum</option>
-//           </select>
-
-//           {aggMode === "sum" && (
-//             <>
-//               <label style={{ marginLeft: 12 }}>Value Column:</label>
-//               <select value={valueCol} onChange={(e) => setValueCol(e.target.value)}>
-//                 <option value="">--select--</option>
-//                 {columns.map(c => <option key={c} value={c}>{c}</option>)}
-//               </select>
-//             </>
-//           )}
-
-//           <button onClick={uploadToServer} style={{ marginLeft: 12 }}>Generate Chart</button>
-//         </div>
-//       )}
-
-//       <div style={{ marginTop: 12, color: "#666" }}>{statusMsg}</div>
-
-//       {/* Chart wrapper: pixel height ensures ResponsiveContainer measures > 0 */}
-//       <div style={{ marginTop: 20 }}>
-//         {chartData.length === 0 ? (
-//           <div style={{ color: "#999" }}>No chart yet. Upload CSV and generate.</div>
-//         ) : (
-//           <div style={{ background: "#fff", padding: 12, borderRadius: 8 }}>
-//             <PieChartComponent data={chartData} />
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-// src/App.jsx
 import React, { useState } from "react";
 import Papa from "papaparse";
-import PieChartComponent from "./components/PieChartComponent";
+import PieChartComponent from "./Components/PieChartComponent";
+import BarChartComponent from "./Components/BarChartComponent";
+import LineChartComponent from "./Components/LineChartComponent";
+import "./App1.css";
 
 export default function App() {
   const [file, setFile] = useState(null);
-  const [previewRows, setPreviewRows] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [previewRows, setPreviewRows] = useState([]);
 
+  // Configuration
   const [categoryCol, setCategoryCol] = useState("");
   const [valueCol, setValueCol] = useState("");
+  const [chartType, setChartType] = useState("pie"); // 'pie' | 'bar' | 'line'
   const [aggMode, setAggMode] = useState("count"); // 'count' | 'sum'
 
   const [chartData, setChartData] = useState([]);
   const [statusMsg, setStatusMsg] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Preview CSV with PapaParse
+  // Handle File Selection
   const handleFile = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
+
     setFile(f);
     setStatusMsg("Parsing preview...");
+
     Papa.parse(f, {
       header: true,
       skipEmptyLines: true,
-      worker: true,
-      preview: 1000, // preview many rows so type detection works
+      preview: 50, // Preview first 50 rows
       complete: (res) => {
         const rows = res.data || [];
-        setPreviewRows(rows.slice(0, 500)); // keep preview limited
+        setPreviewRows(rows);
         setColumns(Object.keys(rows[0] || {}));
-        setStatusMsg(`Preview loaded (${rows.length} rows parsed).`);
+        setStatusMsg("");
       },
       error: (err) => {
         console.error("PapaParse error:", err);
@@ -669,201 +375,243 @@ export default function App() {
     });
   };
 
-  // helper: check whether a column in preview has numeric values (>= fraction)
-  const isColumnMostlyNumeric = (col, threshold = 0.7) => {
-    if (!previewRows || previewRows.length === 0) return false;
-    let numericCount = 0;
-    let totalChecked = 0;
-    for (let i = 0; i < previewRows.length; i++) {
-      const val = previewRows[i][col];
-      if (val === undefined || val === null || String(val).trim() === "") continue;
-      totalChecked++;
-      const n = Number(String(val).replace(/,/g, ""));
-      if (!Number.isNaN(n)) numericCount++;
-      // stop early if enough tested
-      if (totalChecked >= 200) break;
-    }
-    if (totalChecked === 0) return false;
-    return numericCount / totalChecked >= threshold;
-  };
-
-  // Called when user clicks Generate Chart
+  // Generate Chart Logic
   const generateChart = async () => {
-    if (!file) {
-      alert("Please choose a CSV file first.");
-      return;
-    }
-    if (!categoryCol) {
-      alert("Please select a category column.");
-      return;
-    }
+    if (!file) return alert("Please upload a CSV file.");
+    if (!categoryCol) return alert("Please select a category column.");
+    if (aggMode === "sum" && !valueCol) return alert("Please select a value column.");
 
-    // If user picked SUM, validate value column is numeric-ish
-    if (aggMode === "sum") {
-      if (!valueCol) {
-        alert("Please select a value column for SUM aggregation.");
-        return;
-      }
-      const numericOk = isColumnMostlyNumeric(valueCol);
-      if (!numericOk) {
-        const useCount = window.confirm(
-          `Selected value column "${valueCol}" does not look numeric. ` +
-          `Do you want to switch to COUNT aggregation instead? (OK = yes, Cancel = no)`
-        );
-        if (useCount) {
-          setAggMode("count");
-        } else {
-          // continue but warn that non-numeric values will be coerced to 0
-          setStatusMsg("Warning: non-numeric values in value column will be treated as 0.");
-        }
-      }
-    }
+    setIsUploading(true);
+    setStatusMsg("Processing data...");
 
-    setStatusMsg("Uploading file and fetching rows from server...");
     const fd = new FormData();
     fd.append("csvFile", file);
 
     try {
+      // 1. Upload to backend
       const res = await fetch("http://localhost:5000/upload", {
         method: "POST",
         body: fd
       });
 
+      if (!res.ok) throw new Error("Server error");
+
       const json = await res.json();
-      console.log("Server returned:", json);
+      const allRows = json.data;
 
-      if (!json || !Array.isArray(json.data)) {
-        setStatusMsg("Server did not return CSV rows. Check server logs.");
-        alert("Server error: no data returned.");
-        return;
+      if (!allRows || !allRows.length) {
+        throw new Error("No data returned from server.");
       }
 
-      // Aggregate safely: parse floats for SUM, fallback to COUNT if needed
-      const grouped = Object.create(null);
-      json.data.forEach(row => {
-        const catRaw = row[categoryCol];
-        const categoryKey = (catRaw === undefined || catRaw === null || String(catRaw).trim() === "") ? "Unknown" : String(catRaw).trim();
+      // 2. Process Data locally with Auto-Fallback
+      const processData = (rows, mode) => {
+        const grouped = {};
+        let validSumCount = 0;
 
-        if (aggMode === "count") {
-          grouped[categoryKey] = (grouped[categoryKey] || 0) + 1;
-        } else {
-          // SUM mode: parse number, remove commas
-          const raw = row[valueCol];
-          const cleaned = raw === undefined || raw === null ? "" : String(raw).replace(/,/g, "").trim();
-          const n = Number(cleaned);
-          grouped[categoryKey] = (grouped[categoryKey] || 0) + (Number.isNaN(n) ? 0 : n);
-        }
-      });
+        rows.forEach(row => {
+          let cat = row[categoryCol];
+          if (cat === undefined || cat === null || String(cat).trim() === "") {
+            cat = "Unknown";
+          } else {
+            cat = String(cat).trim();
+          }
 
-      // Make array
-      let dataArr = Object.keys(grouped).map(k => ({ name: k, value: grouped[k] }));
-      // sort desc
-      dataArr.sort((a,b) => b.value - a.value);
+          if (mode === "count") {
+            grouped[cat] = (grouped[cat] || 0) + 1;
+            validSumCount++;
+          } else {
+            // Sum mode
+            let rawVal = row[valueCol];
+            if (rawVal === undefined || rawVal === null) rawVal = "";
 
-      // If SUM mode and all values are 0, fallback to COUNT mode automatically (very likely non-numeric)
-      const allZero = dataArr.every(d => d.value === 0);
-      if (aggMode === "sum" && allZero) {
-        // recompute using count
-        const counts = {};
-        json.data.forEach(row => {
-          const cat = (row[categoryCol] === undefined || row[categoryCol] === null) ? "Unknown" : String(row[categoryCol]).trim();
-          counts[cat] = (counts[cat] || 0) + 1;
+            // Remove commas and currency symbols, keep digits/dots/minus
+            const cleanVal = String(rawVal).replace(/[^0-9.-]/g, "");
+            const val = parseFloat(cleanVal);
+
+            if (!isNaN(val)) {
+              grouped[cat] = (grouped[cat] || 0) + val;
+              validSumCount++;
+            }
+          }
         });
-        dataArr = Object.keys(counts).map(k => ({ name: k, value: counts[k] })).sort((a,b)=>b.value-a.value);
-        setStatusMsg("SUM produced all zeros; automatically switched to COUNT aggregation.");
-      } else {
-        setStatusMsg(`Chart ready (${dataArr.length} slices).`);
+
+        // Convert to array
+        let dataArr = Object.keys(grouped).map(k => ({
+          name: k,
+          value: grouped[k]
+        }));
+
+        return { dataArr, validSumCount };
+      };
+
+      // Execution
+      let { dataArr, validSumCount } = processData(allRows, aggMode);
+      let finalMsg = "Chart generated successfully!";
+
+      // FALLBACK: If Sum fails (no valid numbers), try Count automatically
+      if (aggMode === "sum" && validSumCount === 0) {
+        console.warn("Sum mode failed (no numbers). Switching to count.");
+        const fallback = processData(allRows, "count");
+        dataArr = fallback.dataArr;
+        if (dataArr.length > 0) {
+          finalMsg = "Selected column has non-numeric data. Showing 'Count' instead.";
+        }
       }
 
-      // Optionally group small slices into Others (top 12 + others)
-      const TOP = 12;
-      if (dataArr.length > TOP) {
-        const top = dataArr.slice(0, TOP);
-        const othersSum = dataArr.slice(TOP).reduce((s,d)=>s+d.value, 0);
-        top.push({ name: "Others", value: othersSum });
+      // Sort by value desc
+      dataArr.sort((a, b) => b.value - a.value);
+
+      // Take top 15 + Others
+      if (dataArr.length > 15) {
+        const top = dataArr.slice(0, 15);
+        const others = dataArr.slice(15).reduce((acc, curr) => acc + curr.value, 0);
+        top.push({ name: "Others", value: others });
         dataArr = top;
       }
 
       setChartData(dataArr);
+
+      if (dataArr.length === 0) {
+        setStatusMsg("Error: No data found.");
+      } else {
+        setStatusMsg(finalMsg);
+      }
+
     } catch (err) {
-      console.error("Upload error", err);
-      setStatusMsg("Upload failed: " + err.message);
-      alert("Upload failed: " + err.message);
+      console.error(err);
+      setStatusMsg("Error: " + err.message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 1100, margin: "12px auto", color: "#eee", fontFamily: "Arial, sans-serif" }}>
-      <h2>CSV → Chart Generator</h2>
+    <div className="app-container">
+      <header className="app-header">
+        <h1>Data Visualizer</h1>
+        <p className="subtitle">Transform your CSV data into beautiful charts in seconds.</p>
+      </header>
 
-      <div style={{ marginBottom: 10 }}>
-        <input type="file" accept=".csv" onChange={handleFile} />
-      </div>
+      <main className="main-content">
+        <div className="control-panel card">
+          <div className="section-title">
+            <h2>Configuration</h2>
+          </div>
 
-      {/* Column selectors */}
-      {columns.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <label>Category Column: </label>
-          <select value={categoryCol} onChange={e => setCategoryCol(e.target.value)}>
-            <option value="">--select--</option>
-            {columns.map(c => <option value={c} key={c}>{c}</option>)}
-          </select>
+          {/* File Upload */}
+          <div className="form-group">
+            <label className="label">Upload CSV</label>
+            <div className="file-input-wrapper">
+              <input type="file" accept=".csv" onChange={handleFile} id="csv-upload" className="file-input" />
+              <label htmlFor="csv-upload" className="file-label">
+                {file ? file.name : "Choose file..."}
+              </label>
+            </div>
+          </div>
 
-          <label style={{ marginLeft: 12 }}>Aggregation: </label>
-          <select value={aggMode} onChange={e => setAggMode(e.target.value)}>
-            <option value="count">Count</option>
-            <option value="sum">Sum</option>
-          </select>
-
-          {aggMode === "sum" && (
+          {columns.length > 0 && (
             <>
-              <label style={{ marginLeft: 12 }}>Value Column: </label>
-              <select value={valueCol} onChange={e => setValueCol(e.target.value)}>
-                <option value="">--select--</option>
-                {columns.map(c => <option value={c} key={c}>{c}</option>)}
-              </select>
+              {/* Chart Type */}
+              <div className="form-group">
+                <label className="label">Chart Type</label>
+                <div className="toggle-group">
+                  <button
+                    className={`toggle-btn ${chartType === 'pie' ? 'active' : ''}`}
+                    onClick={() => setChartType('pie')}
+                  >
+                    Pie
+                  </button>
+                  <button
+                    className={`toggle-btn ${chartType === 'bar' ? 'active' : ''}`}
+                    onClick={() => setChartType('bar')}
+                  >
+                    Bar
+                  </button>
+                  <button
+                    className={`toggle-btn ${chartType === 'line' ? 'active' : ''}`}
+                    onClick={() => setChartType('line')}
+                  >
+                    Line
+                  </button>
+                </div>
+              </div>
+
+              {/* Aggregation Mode */}
+              <div className="form-group">
+                <label className="label">Aggregation</label>
+                <select
+                  className="select-input"
+                  value={aggMode}
+                  onChange={(e) => setAggMode(e.target.value)}
+                >
+                  <option value="count">Count Occurrences</option>
+                  <option value="sum">Sum Values</option>
+                </select>
+              </div>
+
+              {/* Columns Selection */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="label">Category Column</label>
+                  <select
+                    className="select-input"
+                    value={categoryCol}
+                    onChange={(e) => setCategoryCol(e.target.value)}
+                  >
+                    <option value="">Select Column</option>
+                    {columns.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                {aggMode === 'sum' && (
+                  <div className="form-group">
+                    <label className="label">Value Column</label>
+                    <select
+                      className="select-input"
+                      value={valueCol}
+                      onChange={(e) => setValueCol(e.target.value)}
+                    >
+                      <option value="">Select Column</option>
+                      {columns.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <button
+                className="btn-primary"
+                onClick={generateChart}
+                disabled={isUploading}
+              >
+                {isUploading ? "Processing..." : "Generate Visualization"}
+              </button>
             </>
           )}
 
-          <button onClick={generateChart} style={{ marginLeft: 12, padding: "6px 12px" }}>Generate Chart</button>
+          {statusMsg && <div className="status-message">{statusMsg}</div>}
         </div>
-      )}
 
-      <div style={{ marginTop: 8, color: "#ccc" }}>{statusMsg}</div>
-
-      {/* Preview */}
-      {previewRows.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <strong>Preview (first rows)</strong>
-          <div style={{ maxHeight: 220, overflow: "auto", marginTop: 8, border: "1px solid #444", padding: 8 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
-              <thead>
-                <tr>
-                  {columns.map(h => <th key={h} style={{ textAlign: "left", padding: 6, borderBottom: "1px solid #555" }}>{h}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {previewRows.slice(0, 10).map((r, i) => (
-                  <tr key={i}>
-                    {columns.map(h => <td key={h} style={{ padding: 6, borderBottom: "1px solid #333" }}>{r[h]}</td>)}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* Chart Display Area */}
+        <div className="chart-preview card">
+          {chartData.length > 0 ? (
+            <div className="chart-container">
+              <h3>Preview</h3>
+              {chartType === 'pie' && <PieChartComponent data={chartData} />}
+              {chartType === 'bar' && <BarChartComponent data={chartData} />}
+              {chartType === 'line' && (
+                <div style={{ width: '100%', height: 400 }}>
+                  <LineChartComponent data={chartData} />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="placeholder-icon">📊</div>
+              <p>Upload a file and configure settings to view your chart.</p>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Chart area: fixed pixel height so ResponsiveContainer can render */}
-      <div style={{ marginTop: 24 }}>
-        {chartData.length === 0 ? (
-          <div style={{ color: "#bbb" }}>No chart yet</div>
-        ) : (
-          <div style={{ width: "100%", height: 420, background: "#fff", borderRadius: 8, padding: 8 }}>
-            <PieChartComponent data={chartData} />
-          </div>
-        )}
-      </div>
+      </main>
     </div>
   );
 }
