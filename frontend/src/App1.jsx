@@ -1,343 +1,12 @@
-// import { useForm } from "react-hook-form";
-// import { useState } from "react";
-// import ExpensesChart from "./ExpensesChart";
-// import "./App1.css";
-
-// function App1() {
-//   const {
-//     register,
-//     handleSubmit,
-//     formState: { errors, isSubmitting },
-//     reset,
-//   } = useForm();
-
-//   const [serverError, setServerError] = useState("");
-//   const [csvColumns, setCsvColumns] = useState([]);
-//   const [csvData, setCsvData] = useState([]);
-//   const [selectedChartType, setSelectedChartType] = useState(null);
-//   const [chartError, setChartError] = useState("");
-
-//   // Dropdown selections
-//   const [categoryColumn, setCategoryColumn] = useState("");
-//   const [valueColumn, setValueColumn] = useState("");
-//   const [chartData, setChartData] = useState([]);
-
-//   // Handle upload
-//   const onSubmit = async (data) => {
-//     setServerError("");
-//     setCsvColumns([]);
-//     setCsvData([]);
-//     setChartError("");
-//     setSelectedChartType(data.chartType);
-
-//     const formData = new FormData();
-//     formData.append("companyName", data.companyName);
-//     formData.append("chartType", data.chartType);
-//     formData.append("csvFile", data.csvFile[0]);
-
-//     try {
-//       const response = await fetch("/upload", {
-//         method: "POST",
-//         body: formData,
-//       });
-
-//       if (!response.ok) {
-//         const errorText = await response.text();
-//         throw new Error(errorText || "Server error");
-//       }
-
-//       const result = await response.json();
-//       if (result.data.length > 0) {
-//         setCsvColumns(Object.keys(result.data[0]));
-//         setCsvData(result.data);
-//       }
-//       reset();
-//     } catch (error) {
-//       console.error("Upload failed:", error);
-//       setServerError(error.message || "Upload failed");
-//     }
-//   };
-
-//   // Generate chart data
-//   const generatePieData = () => {
-//     if (!categoryColumn || !valueColumn) {
-//       setChartError("Please select both category and value columns.");
-//       return;
-//     }
-//     if (csvData.length === 0) {
-//       setChartError("No CSV data available.");
-//       return;
-//     }
-
-//     // Count category occurrences
-//     const grouped = {};
-//     csvData.forEach((row) => {
-//       const cat = row[categoryColumn];
-//       if (cat) grouped[cat] = (grouped[cat] || 0) + 1;
-//     });
-
-//     const chartArray = Object.keys(grouped).map((key) => ({
-//       name: key,
-//       value: grouped[key],
-//     }));
-
-//     setChartData(chartArray);
-//     setChartError("");
-//   };
-
-//   return (
-//     <div className="app-container" style={{ padding: "20px", fontFamily: "sans-serif" }}>
-//       <h2 className="text-2xl font-semibold mb-4" style={{ textAlign: "center" }}>
-//         Excel Pie Chart Generator
-//       </h2>
-
-//       {/* Upload Form */}
-//       <form onSubmit={handleSubmit(onSubmit)} className="upload-form">
-//         <label>Company Name</label>
-//         <input
-//           className={errors.companyName ? "input-error" : ""}
-//           {...register("companyName", { required: "Company name is required" })}
-//           placeholder="Enter your company name"
-//         />
-//         {errors.companyName && <p className="error">{errors.companyName.message}</p>}
-
-//         <label>Choose Chart Type</label>
-//         <div className="radio-group">
-//           <label>
-//             <input type="radio" value="pie" {...register("chartType", { required: "Select a chart type" })} /> Pie Chart
-//           </label>
-//           <label>
-//             <input type="radio" value="bar" {...register("chartType", { required: "Select a chart type" })} /> Bar Chart
-//           </label>
-//           <label>
-//             <input type="radio" value="line" {...register("chartType", { required: "Select a chart type" })} /> Line Chart
-//           </label>
-//         </div>
-//         {errors.chartType && <p className="error">{errors.chartType.message}</p>}
-
-//         <label>Upload CSV File</label>
-//         <input type="file" accept=".csv" {...register("csvFile", { required: "CSV file is required" })} />
-//         {errors.csvFile && <p className="error">{errors.csvFile.message}</p>}
-
-//         <button type="submit" disabled={isSubmitting}>
-//           {isSubmitting ? "Uploading..." : "Upload CSV"}
-//         </button>
-//       </form>
-
-//       {/* After upload: Show dropdowns */}
-//       {csvColumns.length > 0 && (
-//         <div className="chart-selection" style={{ textAlign: "center", marginTop: "30px" }}>
-//           <label style={{ marginRight: "10px" }}>Category Column:</label>
-//           <select value={categoryColumn} onChange={(e) => setCategoryColumn(e.target.value)}>
-//             <option value="">Select</option>
-//             {csvColumns.map((col) => (
-//               <option key={col} value={col}>{col}</option>
-//             ))}
-//           </select>
-
-//           <label style={{ margin: "0 10px" }}>Value Column:</label>
-//           <select value={valueColumn} onChange={(e) => setValueColumn(e.target.value)}>
-//             <option value="">Select</option>
-//             {csvColumns.map((col) => (
-//               <option key={col} value={col}>{col}</option>
-//             ))}
-//           </select>
-
-//           <button
-//             style={{
-//               background: "#007bff",
-//               color: "white",
-//               border: "none",
-//               padding: "8px 15px",
-//               borderRadius: "5px",
-//               marginLeft: "10px",
-//             }}
-//             onClick={generatePieData}
-//           >
-//             Generate Chart
-//           </button>
-//         </div>
-//       )}
-
-//       {/* Chart Display */}
-//       <div style={{ marginTop: "30px", display: "flex", justifyContent: "center" }}>
-//         {chartError && <p style={{ color: "red" }}>{chartError}</p>}
-//         {chartData.length > 0 && selectedChartType === "pie" && <ExpensesChart data={chartData} />}
-//       </div>
-
-//       {serverError && <p className="error">{serverError}</p>}
-//     </div>
-//   );
-// }
-
-// export default App1;
-
-
-// // App.jsx
-
-// import React, { useState } from "react";
-// import Papa from "papaparse";
-// import PieChartComponent from "./Components/PieChartComponent";
-
-// export default function App1() {
-//   const [file, setFile] = useState(null);
-//   const [previewRows, setPreviewRows] = useState([]);
-//   const [columns, setColumns] = useState([]);
-
-//   const [categoryCol, setCategoryCol] = useState("");
-//   const [valueCol, setValueCol] = useState("");
-//   const [aggMode, setAggMode] = useState("count");
-
-//   const [chartData, setChartData] = useState([]);
-
-//   // Load + preview CSV
-//   const handleFile = (e) => {
-//     const f = e.target.files[0];
-//     if (!f) return;
-
-//     setFile(f);
-
-//     Papa.parse(f, {
-//       header: true,
-//       skipEmptyLines: true,
-//       worker: true,
-//       complete: (res) => {
-//         setPreviewRows(res.data.slice(0, 10)); // show preview
-//         setColumns(Object.keys(res.data[0] || {}));
-//         alert("CSV preview loaded!");
-//       }
-//     });
-//   };
-
-//   // Send CSV to backend
-//   const uploadToServer = async () => {
-//     if (!file) return alert("Please upload a CSV file first");
-//     if (!categoryCol) return alert("Select category column");
-//     if (aggMode === "sum" && !valueCol) return alert("Select value column");
-
-//     const fd = new FormData();
-//     fd.append("csvFile", file);
-
-//     const res = await fetch("http://localhost:5000/upload", {
-//       method: "POST",
-//       body: fd
-//     });
-
-//     const json = await res.json();
-
-//     if (!json.data) return alert("Error reading CSV");
-
-//     // Aggregate
-//     const grouped = {};
-
-//     json.data.forEach((row) => {
-//       const key = row[categoryCol] || "Unknown";
-
-//       if (aggMode === "count") {
-//         grouped[key] = (grouped[key] || 0) + 1;
-//       } else {
-//         const num = Number(row[valueCol]) || 0;
-//         grouped[key] = (grouped[key] || 0) + num;
-//       }
-//     });
-
-//     const chartArr = Object.keys(grouped).map((k) => ({
-//       name: k,
-//       value: grouped[k],
-//     }));
-
-//     setChartData(chartArr);
-//     alert("Chart Generated Successfully!");
-//   };
-
-//   return (
-//     <div style={{ maxWidth: 900, margin: "20px auto" }}>
-//       <h2>CSV → Chart Generator</h2>
-
-//       <input type="file" accept=".csv" onChange={handleFile} />
-
-//       {columns.length > 0 && (
-//         <div style={{ marginTop: 12 }}>
-//           <label>Category Column: </label>
-//           <select value={categoryCol} onChange={(e) => setCategoryCol(e.target.value)}>
-//             <option value="">--select--</option>
-//             {columns.map((c) => (
-//               <option key={c}>{c}</option>
-//             ))}
-//           </select>
-
-//           <label style={{ marginLeft: 10 }}>Aggregation: </label>
-//           <select value={aggMode} onChange={(e) => setAggMode(e.target.value)}>
-//             <option value="count">Count</option>
-//             <option value="sum">Sum</option>
-//           </select>
-
-//           {aggMode === "sum" && (
-//             <>
-//               <label style={{ marginLeft: 10 }}>Value Column: </label>
-//               <select value={valueCol} onChange={(e) => setValueCol(e.target.value)}>
-//                 <option value="">--select--</option>
-//                 {columns.map((c) => (
-//                   <option key={c}>{c}</option>
-//                 ))}
-//               </select>
-//             </>
-//           )}
-
-//           <button onClick={uploadToServer} style={{ marginLeft: 10, padding: "5px 12px" }}>
-//             Generate Chart
-//           </button>
-//         </div>
-//       )}
-
-//       {/* Preview Table */}
-//       {previewRows.length > 0 && (
-//         <div style={{ marginTop: 20 }}>
-//           <strong>CSV Preview (first 10 rows)</strong>
-//           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 8 }}>
-//             <thead>
-//               <tr>
-//                 {columns.map((h) => (
-//                   <th key={h} style={{ borderBottom: "1px solid #ccc", padding: 6 }}>{h}</th>
-//                 ))}
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {previewRows.map((r, i) => (
-//                 <tr key={i}>
-//                   {columns.map((h) => (
-//                     <td key={h} style={{ padding: 6, borderBottom: "1px solid #eee" }}>
-//                       {r[h]}
-//                     </td>
-//                   ))}
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       )}
-
-//       {/* Chart Output */}
-//       {chartData.length > 0 && (
-//         <div style={{ marginTop: 30 }}>
-//           <PieChartComponent data={chartData} />
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Papa from "papaparse";
+import html2canvas from "html2canvas";
 import PieChartComponent from "./Components/PieChartComponent";
 import BarChartComponent from "./Components/BarChartComponent";
 import LineChartComponent from "./Components/LineChartComponent";
 import "./App1.css";
 
-import DatasetHistory from "./Components/DatasetHistory";
-
-import { uploadDataset } from "./services/api";
+import { useAuth } from "./context/AuthContext";
 
 import {
   detectColumnType,
@@ -347,6 +16,8 @@ import {
 
 
 export default function App1() {
+  const { user, token, logout } = useAuth();
+
   const [file, setFile] = useState(null);
   const [columns, setColumns] = useState([]);
   const [previewRows, setPreviewRows] = useState([]);
@@ -354,12 +25,55 @@ export default function App1() {
   // Configuration
   const [categoryCol, setCategoryCol] = useState("");
   const [valueCol, setValueCol] = useState("");
-  const [chartType, setChartType] = useState("pie"); // 'pie' | 'bar' | 'line'
-  const [aggMode, setAggMode] = useState("count"); // 'count' | 'sum'
+  const [chartType, setChartType] = useState("pie");
+  const [aggMode, setAggMode] = useState("count");
 
   const [chartData, setChartData] = useState([]);
   const [statusMsg, setStatusMsg] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+
+  // Chart history
+  const [chartHistory, setChartHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyTab, setHistoryTab] = useState("uploads"); // 'uploads' | 'charts'
+
+  // Upload history
+  const [uploadHistory, setUploadHistory] = useState([]);
+
+  // Ref for chart download
+  const chartRef = useRef(null);
+
+  // Fetch histories on mount
+  useEffect(() => {
+    if (token) {
+      fetchHistory();
+      fetchUploadHistory();
+    }
+  }, [token]);
+
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/charts/history", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.charts) setChartHistory(data.charts);
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+    }
+  };
+
+  const fetchUploadHistory = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/uploads/history", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.uploads) setUploadHistory(data.uploads);
+    } catch (err) {
+      console.error("Failed to fetch upload history:", err);
+    }
+  };
 
   // Handle File Selection
   const handleFile = (e) => {
@@ -372,7 +86,7 @@ export default function App1() {
     Papa.parse(f, {
       header: true,
       skipEmptyLines: true,
-      preview: 50, // Preview first 50 rows
+      preview: 50,
       complete: (res) => {
         const rows = res.data || [];
         setPreviewRows(rows);
@@ -399,9 +113,9 @@ export default function App1() {
     fd.append("csvFile", file);
 
     try {
-      // 1. Upload to backend
       const res = await fetch("http://localhost:5000/upload", {
         method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
         body: fd
       });
 
@@ -414,7 +128,7 @@ export default function App1() {
         throw new Error("No data returned from server.");
       }
 
-      // 2. Process Data locally with Auto-Fallback
+      // Process Data
       const processData = (rows, mode) => {
         const grouped = {};
         let validSumCount = 0;
@@ -431,14 +145,10 @@ export default function App1() {
             grouped[cat] = (grouped[cat] || 0) + 1;
             validSumCount++;
           } else {
-            // Sum mode
             let rawVal = row[valueCol];
             if (rawVal === undefined || rawVal === null) rawVal = "";
-
-            // Remove commas and currency symbols, keep digits/dots/minus
             const cleanVal = String(rawVal).replace(/[^0-9.-]/g, "");
             const val = parseFloat(cleanVal);
-
             if (!isNaN(val)) {
               grouped[cat] = (grouped[cat] || 0) + val;
               validSumCount++;
@@ -446,7 +156,6 @@ export default function App1() {
           }
         });
 
-        // Convert to array
         let dataArr = Object.keys(grouped).map(k => ({
           name: k,
           value: grouped[k]
@@ -455,13 +164,11 @@ export default function App1() {
         return { dataArr, validSumCount };
       };
 
-      // Execution
       let { dataArr, validSumCount } = processData(allRows, aggMode);
       let finalMsg = "Chart generated successfully!";
 
-      // FALLBACK: If Sum fails (no valid numbers), try Count automatically
       if (aggMode === "sum" && validSumCount === 0) {
-        console.warn("Sum mode failed (no numbers). Switching to count.");
+        console.warn("Sum mode failed. Switching to count.");
         const fallback = processData(allRows, "count");
         dataArr = fallback.dataArr;
         if (dataArr.length > 0) {
@@ -469,10 +176,8 @@ export default function App1() {
         }
       }
 
-      // Sort by value desc
       dataArr.sort((a, b) => b.value - a.value);
 
-      // Take top 15 + Others
       if (dataArr.length > 15) {
         const top = dataArr.slice(0, 15);
         const others = dataArr.slice(15).reduce((acc, curr) => acc + curr.value, 0);
@@ -486,6 +191,7 @@ export default function App1() {
         setStatusMsg("Error: No data found.");
       } else {
         setStatusMsg(finalMsg);
+        fetchUploadHistory(); // Refresh upload history
       }
 
     } catch (err) {
@@ -496,12 +202,209 @@ export default function App1() {
     }
   };
 
+  // ===========================
+  //  CHART DOWNLOAD (PNG)
+  // ===========================
+  const downloadChart = async () => {
+    if (!chartRef.current) return;
+
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+      });
+
+      const link = document.createElement("a");
+      link.download = `graphify-${chartType}-chart.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Failed to download chart.");
+    }
+  };
+
+  // ===========================
+  //  SAVE CHART TO DATABASE
+  // ===========================
+  const saveChart = async () => {
+    if (!chartData.length) return alert("No chart to save.");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/charts/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fileName: file?.name || "unknown.csv",
+          chartType,
+          categoryColumn: categoryCol,
+          valueColumn: valueCol,
+          aggMode,
+          chartData,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setStatusMsg("✅ Chart saved to your history!");
+      fetchHistory(); // Refresh history
+    } catch (err) {
+      console.error("Save failed:", err);
+      setStatusMsg("Failed to save chart: " + err.message);
+    }
+  };
+
+  // ===========================
+  //  LOAD CHART FROM HISTORY
+  // ===========================
+  const loadChart = (chart) => {
+    setChartType(chart.chartType);
+    setChartData(chart.chartData);
+    setCategoryCol(chart.categoryColumn);
+    setValueCol(chart.valueColumn || "");
+    setAggMode(chart.aggMode);
+    setShowHistory(false);
+    setStatusMsg(`Loaded: ${chart.fileName} (${chart.chartType} chart)`);
+  };
+
+  // ===========================
+  //  DELETE CHART FROM HISTORY
+  // ===========================
+  const deleteChart = async (chartId) => {
+    try {
+      await fetch(`http://localhost:5000/api/charts/${chartId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchHistory();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
   return (
     <div className="app-container">
+      {/* Top Navbar */}
       <header className="app-header">
-        <h1>Data Visualizer</h1>
-        <p className="subtitle">Transform your CSV data into beautiful charts in seconds.</p>
+        <div className="header-top">
+          <div>
+            <h1>Graphify</h1>
+            <p className="subtitle">Transform your CSV data into beautiful charts</p>
+          </div>
+          <div className="user-info">
+            <span className="user-name">👤 {user?.name}</span>
+            <button className="btn-history" onClick={() => setShowHistory(!showHistory)}>
+              📜 History
+            </button>
+            <button className="btn-logout" onClick={logout}>
+              Logout
+            </button>
+          </div>
+        </div>
       </header>
+
+      {/* History Panel with Tabs */}
+      {showHistory && (
+        <div className="history-panel card">
+          {/* Tabs */}
+          <div className="history-tabs">
+            <button
+              className={`history-tab ${historyTab === 'uploads' ? 'active' : ''}`}
+              onClick={() => setHistoryTab('uploads')}
+            >
+              📁 File Uploads ({uploadHistory.length})
+            </button>
+            <button
+              className={`history-tab ${historyTab === 'charts' ? 'active' : ''}`}
+              onClick={() => setHistoryTab('charts')}
+            >
+              📊 Saved Charts ({chartHistory.length})
+            </button>
+          </div>
+
+          {/* Upload History Tab */}
+          {historyTab === 'uploads' && (
+            <>
+              {uploadHistory.length === 0 ? (
+                <p className="history-empty">No files uploaded yet.</p>
+              ) : (
+                <div className="history-list">
+                  {uploadHistory.map((upload) => (
+                    <div key={upload._id} className="history-item">
+                      <div className="history-item-info">
+                        <span className="history-type">📄</span>
+                        <div>
+                          <strong>{upload.fileName}</strong>
+                          <small>
+                            {upload.rowCount} rows • {upload.columns.length} columns
+                            {" • "}
+                            {new Date(upload.createdAt).toLocaleDateString()}{" "}
+                            {new Date(upload.createdAt).toLocaleTimeString()}
+                          </small>
+                          <small className="upload-cols">
+                            Columns: {upload.columns.join(", ")}
+                          </small>
+                        </div>
+                      </div>
+                      <div className="history-item-actions">
+                        <button className="btn-delete" onClick={async () => {
+                          try {
+                            await fetch(`http://localhost:5000/api/uploads/${upload._id}`, {
+                              method: "DELETE",
+                              headers: { Authorization: `Bearer ${token}` },
+                            });
+                            fetchUploadHistory();
+                          } catch (err) {
+                            console.error("Delete failed:", err);
+                          }
+                        }}>✕</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Chart History Tab */}
+          {historyTab === 'charts' && (
+            <>
+              {chartHistory.length === 0 ? (
+                <p className="history-empty">No saved charts yet. Generate and save your first chart!</p>
+              ) : (
+                <div className="history-list">
+                  {chartHistory.map((chart) => (
+                    <div key={chart._id} className="history-item">
+                      <div className="history-item-info">
+                        <span className="history-type">
+                          {chart.chartType === "pie" ? "🥧" : chart.chartType === "bar" ? "📊" : "📈"}
+                        </span>
+                        <div>
+                          <strong>{chart.fileName}</strong>
+                          <small>
+                            {chart.chartType.toUpperCase()} • {chart.categoryColumn} • {chart.aggMode}
+                            {" • "}
+                            {new Date(chart.createdAt).toLocaleDateString()}
+                          </small>
+                        </div>
+                      </div>
+                      <div className="history-item-actions">
+                        <button className="btn-load" onClick={() => loadChart(chart)}>Load</button>
+                        <button className="btn-delete" onClick={() => deleteChart(chart._id)}>✕</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       <main className="main-content">
         <div className="control-panel card">
@@ -530,19 +433,19 @@ export default function App1() {
                     className={`toggle-btn ${chartType === 'pie' ? 'active' : ''}`}
                     onClick={() => setChartType('pie')}
                   >
-                    Pie
+                    🥧 Pie
                   </button>
                   <button
                     className={`toggle-btn ${chartType === 'bar' ? 'active' : ''}`}
                     onClick={() => setChartType('bar')}
                   >
-                    Bar
+                    📊 Bar
                   </button>
                   <button
                     className={`toggle-btn ${chartType === 'line' ? 'active' : ''}`}
                     onClick={() => setChartType('line')}
                   >
-                    Line
+                    📈 Line
                   </button>
                 </div>
               </div>
@@ -606,14 +509,26 @@ export default function App1() {
         <div className="chart-preview card">
           {chartData.length > 0 ? (
             <div className="chart-container">
-              <h3>Preview</h3>
-              {chartType === 'pie' && <PieChartComponent data={chartData} />}
-              {chartType === 'bar' && <BarChartComponent data={chartData} />}
-              {chartType === 'line' && (
-                <div style={{ width: '100%', height: 400 }}>
-                  <LineChartComponent data={chartData} />
+              <div className="chart-header">
+                <h3>Preview</h3>
+                <div className="chart-actions">
+                  <button className="btn-action btn-save" onClick={saveChart} title="Save to history">
+                    💾 Save
+                  </button>
+                  <button className="btn-action btn-download" onClick={downloadChart} title="Download as PNG">
+                    ⬇️ Download PNG
+                  </button>
                 </div>
-              )}
+              </div>
+              <div ref={chartRef} className="chart-render-area">
+                {chartType === 'pie' && <PieChartComponent data={chartData} />}
+                {chartType === 'bar' && <BarChartComponent data={chartData} />}
+                {chartType === 'line' && (
+                  <div style={{ width: '100%', height: 400 }}>
+                    <LineChartComponent data={chartData} />
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="empty-state">
