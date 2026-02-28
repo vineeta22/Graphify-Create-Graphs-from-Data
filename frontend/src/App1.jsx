@@ -335,7 +335,18 @@ import BarChartComponent from "./Components/BarChartComponent";
 import LineChartComponent from "./Components/LineChartComponent";
 import "./App1.css";
 
-export default function App() {
+import DatasetHistory from "./Components/DatasetHistory";
+
+import { uploadDataset } from "./services/api";
+
+import {
+  detectColumnType,
+  detectTrend,
+  recommendChart
+} from "./utils/autoInsights";
+
+
+export default function App1() {
   const [file, setFile] = useState(null);
   const [columns, setColumns] = useState([]);
   const [previewRows, setPreviewRows] = useState([]);
